@@ -1,0 +1,22 @@
+[Unit]
+Description=SmartAssert Node.js API
+After=network.target
+
+[Service]
+Type=simple
+User=smartassert
+Group=smartassert
+WorkingDirectory=/opt/smartassert/cloud/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/smartassert/cloud/backend/.env
+ExecStart=/usr/bin/node /opt/smartassert/cloud/backend/server.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/smartassert/cloud/backend/data
+
+[Install]
+WantedBy=multi-user.target
