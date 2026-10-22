@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloud File Manager</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#172033;background:#f4f7fb}
+    *{box-sizing:border-box}body{margin:0}.top{background:linear-gradient(120deg,#111d3c,#1e4c83);color:white;padding:30px 20px}
+    .wrap{max-width:1100px;margin:auto}.eyebrow{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:#b7d5ff;font-weight:700}
+    h1{margin:8px 0;font-size:clamp(27px,4vw,38px)}.subtitle{color:#dbeafe;margin:0}.main{max-width:1100px;margin:26px auto;padding:0 18px 36px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:22px;box-shadow:0 8px 24px #1e293b08}
+    h2{margin:0 0 8px;font-size:19px}.muted{color:#64748b;font-size:14px}.drop{border:1.5px dashed #b8c6d9;background:#f8fbff;border-radius:12px;padding:22px;margin:18px 0}
+    input[type=file]{display:block;width:100%;margin:10px 0 15px}.btn{display:inline-flex;align-items:center;justify-content:center;background:#2563eb;color:white;border:0;border-radius:9px;padding:11px 16px;font-weight:700;text-decoration:none;cursor:pointer;min-height:42px}
+    .btn:hover{background:#1d4ed8}.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.pill{background:#eef4ff;color:#214a8a;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:700}
+    .alert{padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:14px}.success{background:#ecfdf3;color:#166534}.error{background:#fff1f2;color:#9f1239}
+    .table-card{margin-top:18px;padding:0;overflow:hidden}.table-head{padding:20px 22px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:650px}th,td{text-align:left;padding:14px 18px;border-bottom:1px solid #edf1f6;font-size:13px}th{color:#64748b;background:#fbfcfe;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+    tr:last-child td{border-bottom:0}.filename{font-weight:700;color:#172033}.filetype{display:inline-block;background:#f1f5f9;border-radius:6px;padding:4px 7px;color:#475569;font-size:11px}
+    .download{color:#2563eb;text-decoration:none;font-weight:700}.empty{text-align:center;padding:38px 16px;color:#64748b}.footer{text-align:center;color:#94a3b8;font-size:12px;padding:22px}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.top{padding:24px 18px}.card{padding:18px}.main{margin-top:18px}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="eyebrow">AWS · Cloud Storage</div>
+      <h1>Cloud File Manager</h1>
+      <p class="subtitle">Upload files to private S3 storage and track metadata in RDS.</p>
+    </div>
+  </header>
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+    <section class="grid">
+      <div class="card">
+        <h2>Upload a file</h2>
+        <p class="muted">Choose a file from your computer. The file is stored in S3; its metadata is saved in MySQL.</p>
+        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+          <div class="drop">
+            <strong>Select a file</strong>
+            <input type="file" name="file" required>
+            <div class="muted">Maximum file size: {{ max_upload_mb }} MB</div>
+          </div>
+          <button class="btn" type="submit">↑ &nbsp; Upload file</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Storage overview</h2>
+        <p class="muted">Your uploaded files, with metadata recorded in the database.</p>
+        <div class="stats">
+          <span class="pill">{{ files|length }} recent file(s)</span>
+          <span class="pill">Private S3 bucket</span>
+          <span class="pill">RDS MySQL metadata</span>
+        </div>
+        <p class="muted" style="margin-top:22px">For this demo, the list displays up to 200 most recently uploaded files. Download links expire after 5 minutes.</p>
+      </div>
+    </section>
+    <section class="card table-card">
+      <div class="table-head">
+        <div><h2>Uploaded files</h2><div class="muted">File metadata stored in Amazon RDS</div></div>
+        <a class="download" href="{{ url_for('index') }}">Refresh ↻</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>File name</th><th>Size</th><th>Content type</th><th>Uploaded at</th><th>Action</th></tr></thead>
+          <tbody>
+          {% for file in files %}
+            <tr>
+              <td><span class="filename">{{ file.filename }}</span></td>
+              <td>
+                {% if file.file_size >= 1048576 %}{{ "%.2f"|format(file.file_size / 1048576) }} MB
+                {% elif file.file_size >= 1024 %}{{ "%.1f"|format(file.file_size / 1024) }} KB
+                {% else %}{{ file.file_size }} B{% endif %}
+              </td>
+              <td><span class="filetype">{{ file.content_type }}</span></td>
+              <td>{{ file.uploaded_at.strftime("%d %b %Y, %H:%M") if file.uploaded_at else "—" }}</td>
+              <td><a class="download" href="{{ url_for('download', file_id=file.id) }}">Download ↓</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="empty">No files uploaded yet. Choose a file above to get started.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <div class="footer">Cloud File Manager · Deployed with Terraform · Keep your AWS resources secure</div>
+  </main>
+</body>
+</html>

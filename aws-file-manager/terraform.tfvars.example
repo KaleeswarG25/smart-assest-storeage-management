@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars if you want to customize values.
+aws_region         = "ap-south-1"
+project_name       = "cloud-file-manager"
+ec2_instance_type  = "t3.micro"
+db_instance_class  = "db.t3.micro"
+max_upload_mb      = 25
+
+# For a quick demo this allows HTTP from anywhere. For safer use, replace with
+# your public IP, e.g. ["203.0.113.10/32"].
+allowed_http_cidrs = ["0.0.0.0/0"]
