@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Local environment & secrets
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# Local SQLite databases
+*.sqlite
+*.sqlite3
+*.db
+*.db.bak
+*.db-journal
+*.db-wal
+*.db-shm
+data/*.sqlite
+data/*.sqlite3
+data/*.db
+data/uploads/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing & coverage
+coverage/
+.nyc_output/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.running.exe

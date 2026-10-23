@@ -1,0 +1,25 @@
+{
+  "name": "cloud-it-asset-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloud-Based IT Asset Lifecycle & Software License Management System",
+  "scripts": {
+    "setup": "npm --prefix backend run db:setup && npm --prefix frontend install",
+    "backend:dev": "npm --prefix backend run dev",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "backend:test": "npm --prefix backend test",
+    "frontend:test": "npm --prefix frontend test",
+    "frontend:build": "npm --prefix frontend run build",
+    "test": "npm --prefix backend test && npm --prefix frontend test"
+  },
+  "keywords": [
+    "asset-lifecycle",
+    "license-management",
+    "express",
+    "react",
+    "vite",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "ISC"
+}
